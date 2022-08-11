@@ -25,8 +25,12 @@ SECRET_KEY = 'django-insecure-8vgvm*#hi51q0nie$=p9039ni*-(77e2a!57n6b51sp(9&1bcg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+'''
+[]，空列表,表示只有1217.0.0.1，localhost能访问本项目；
+['*']，表示任何网络地址都能访问到当前项目；
+['192.168.1.3', '192.168.3.3'] 表示只有当前两个主机能访问当前项目
+'''
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -104,19 +108,23 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
-
+"""LANGUAGE_CODE 取值是英文：'en-us'或者中文：'zh-Hans'"""
 LANGUAGE_CODE = 'en-us'
 
+"""TIME_ZONE 取值是世界时区 'UTC' 或中国时区 'Asia/Shanghai'"""
 TIME_ZONE = 'UTC'
 
+# 提供国际化服务支持
 USE_I18N = True
+# USE_L10N = True
 
+# 提供本地化服务支持
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
+# 静态资源的存放位置，静态资源包括 CSS、JS、Images
 STATIC_URL = 'static/'
 
 # Default primary key field type
