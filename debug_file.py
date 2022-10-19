@@ -15,7 +15,7 @@ body = '''Hello, world! <h1> from test_file </h1>'''
 response_params = [
     'HTTP/1.0 200 OK',
     'Date: Sun, 27 may 2018 01:01:01 GMT',
-    'Content-Type: text/plain; charset=utf-8',
+    'Content-Type: text/html; charset=utf-8',
     'Content-Length: {0}\r\n'.format(len(body.encode())),
     body,
 ]
@@ -52,4 +52,5 @@ def main():
     pass
 
 if __name__ == '__main__':
+    main()
     pass
