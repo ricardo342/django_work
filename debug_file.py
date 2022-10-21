@@ -80,6 +80,6 @@ def api_test():
     return r.json()
 
 if __name__ == '__main__':
-    # main()
-    pprint.pprint(api_test())
+    main()
+    # pprint.pprint(api_test())
     pass
