@@ -7,6 +7,8 @@
 @Desc:代码调试文件
 '''
 
+import os
+import sys
 import errno
 import socket
 import requests
@@ -78,6 +80,16 @@ def api_test():
     header = {'Authorization': 'Bearer  APP_USR-7483778333791187-101902-30cc2f4e50379f7679478d7a883d5bab-698703218'}
     r = requests.get(url, headers=header)
     return r.json()
+
+'''简单的web application程序'''
+def simple_app(environ, start_response):
+    """Simplest possible application object"""
+    status = '200 OK'
+    response_headers = [('Content-type', 'text/plain')]
+    start_response(status, response_headers)
+    return [b'Hello world -by the5fire \n']
+
+'''编写可以调用simple_app方法的程序'''
 
 if __name__ == '__main__':
     main()
