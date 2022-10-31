@@ -87,11 +87,85 @@ def simple_app(environ, start_response):
     status = '200 OK'
     response_headers = [('Content-type', 'text/plain')]
     start_response(status, response_headers)
-    return [b'Hello world -by the5fire \n']
+    return [b'Hello world! -by the5fire \n']
 
 '''编写可以调用simple_app方法的程序'''
+def wsgi_to_bytes(s):
+    return s.encode()
+
+def run_with_cgi(application):
+    environ = dict(os.environ.items())
+    environ['wsgi.input'] = sys.stdin.buffer
+    environ['wsgi.errors'] = sys.stderr
+    environ['wsgi.version'] = (1, 0)
+    environ['wsgi.multithread'] = False
+    environ['wsgi.multiprocess'] = True
+    environ['wsgi.run_once'] = True
+
+    if environ.get('HTTPS', 'off') in ('on', '1'):
+        environ['wsgi.url_scheme'] = 'https'
+    else:
+        environ['wsgi.url_scheme'] = 'http'
+
+    headers_set = []
+    headers_sent = []
+
+    def write(data):
+        out = sys.stdout.buffer
+
+        if not headers_set:
+            raise AssertionError("write() before start_response()")
+
+        elif not headers_sent:
+            # 在输出第一行数据之前, 先发送响应头
+            status, response_headers = headers_sent[:] = headers_set
+            out.write(wsgi_to_bytes('Status: {0}\r\n'.format(status)))
+            for header in response_headers:
+                out.write(wsgi_to_bytes('{0}: {0}\r\n'.format(header)))
+            out.write(wsgi_to_bytes('\r\n'))
+
+        out.write(data)
+        out.flush()
+
+    def start_response(status, response_headers, exc_info=None):
+        if exc_info:
+            try:
+                if headers_sent:
+                    # 如果已经发送了header, 则重新抛出原始异常信息
+                    raise (exc_info[0], exc_info[1], exc_info[2])
+            finally:
+                # 避免循环引用
+                exc_info = None
+        elif headers_set:
+            raise AssertionError("Headers already set!")
+
+        headers_set[:] = [status, response_headers]
+        return write
+    result = application(environ, start_response)
+
+    try:
+        for data in result:
+            # 如果没有body数据, 则不发送header
+            if data:
+                write(data)
+        if not headers_sent:
+            # 如果body数据为空, 则发送数据header
+            write('')
+    finally:
+        if hasattr(result, 'close'):
+            result.close()
+
+class AppClass(object):
+    status = '200 OK'
+    response_headers = [('Content-type', 'text/plain')]
+
+    def __call__(self, environ, start_response):
+        print(environ, start_response)
+        start_response(self.status, self.response_headers)
+        return [b'Hello AppClass.__call__\n']
+
+application = AppClass()
 
 if __name__ == '__main__':
-    main()
-    # pprint.pprint(api_test())
+    run_with_cgi(simple_app)
     pass
