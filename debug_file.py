@@ -81,13 +81,21 @@ def api_test():
     r = requests.get(url, headers=header)
     return r.json()
 
+def Repsonse(*args, **kwargs):
+    pass
+
 '''简单的web application程序'''
 def simple_app(environ, start_response):
     """Simplest possible application object"""
-    status = '200 OK'
-    response_headers = [('Content-type', 'text/plain')]
-    start_response(status, response_headers)
-    return [b'Hello world! -by the5fire \n']
+    # status = '200 OK'
+    # response_headers = [('Content-type', 'text/plain')]
+    # start_response(status, response_headers)
+    # return [b'Hello world! -by the5fire \n']
+    '''直接封装response对象'''
+    response = Repsonse('Hello World', start_response=start_response)
+    # 这个函数里面调用start_response
+    response.set_header('Content-Type', 'text/plain')
+    return response
 
 '''编写可以调用simple_app方法的程序'''
 def wsgi_to_bytes(s):
@@ -165,6 +173,40 @@ class AppClass(object):
         return [b'Hello AppClass.__call__\n']
 
 application = AppClass()
+
+class AppClassIter(object):
+    status = '200 OK'
+    response_headers = [('Content-type', 'text/plain')]
+
+    def __init__(self, environ, start_response):
+        self.environ = environ
+        self.start_response = start_response
+
+    def __iter__(self):
+        self.start_response(self.status, self.response_headers)
+        yield b'Hello AppClassIter\n'
+
+def set_status(status=None):
+    pass
+
+def set_header(*args):
+    pass
+
+def start_response(status, headers):
+    # 伪代码
+    set_status(status)
+    for k, v in headers:
+        set_header(k, v)
+
+def handle_conn(conn, environ, start_response):
+    # 调用前面定义的application
+    app = application(environ, start_response)
+    # 遍历返回的结果，生成response
+    response = ''
+    for data in app:
+        response += data
+
+    conn.sendall(response)
 
 if __name__ == '__main__':
     run_with_cgi(simple_app)
